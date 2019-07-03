@@ -38,12 +38,25 @@ void send_all(tcp::socket &Sock, const string &message) {
 }
 // End messaging protocol
 
+void accept_handler(const boost::system::error_code &error)
+{
+  if (!error)
+  {
+    cout << "Connection made." << endl;
+  }
+  else
+  {
+  	cerr << "bruh what" << endl;
+  }
+}
+
 int main()
 {
 	io_service ioservice;
 	tcp::endpoint endpoint{tcp::v4(), PORT};
-	tcp::acceptor accepted{ioservice, endpoint};
+	tcp::acceptor accepting{ioservice, endpoint};
 	tcp::socket sock{ioservice};
+	sock.set_option(tcp::acceptor::reuse_address(true));
 	try
 	{
 		sock.bind(endpoint, e);
@@ -55,8 +68,8 @@ int main()
 	}
 	
 	cout << "Ready boii" << endl;
-	accepted.listen();
-	accepted.accept(sock);
+	accepting.listen();
+	accepting.async_accept(sock, accept_handler);
 	cout << "Accepted " << sock.remote_endpoint().address().to_string() << endl;
 
 	
