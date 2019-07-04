@@ -21,13 +21,14 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 		
 		# Fill in start
 		# part 1 and 3
-		TTL = struct.unpack("i", recPacket[8:9])
+		TTL = struct.unpack("B", recPacket[8:9])[0] # TTL in the IP header 8 octets down and is only of size 1 octet
 		header = struct.unpack("bbHHh", recPacket[20:28]) # 20 to 28 because ICMP header starts at bits 160 (20 byte)
 		# header is a tuple of (type, code, checksum, packet id, sequence)
-		dataSize = struct.calcsize("d")
-		data = struct.unpack("d", recPacket[28:28 + dataSize])
-		print("PONG: ", header[0])
-		RTT = data - timeReceived
+		data = struct.unpack("d", recPacket[28:])[0]
+		# print("PONG: ", header)
+		RTT = timeReceived - float(data)
+		# print("data: {}, timeReceived: {}".format(data, timeReceived))
+		# print("TTL: ", TTL)
 		if header[3] == ID:
 			return RTT
 		# Fill in end
