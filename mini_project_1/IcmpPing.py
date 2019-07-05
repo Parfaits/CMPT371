@@ -29,8 +29,15 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 		RTT = timeReceived - float(data)
 		# print("data: {}, timeReceived: {}".format(data, timeReceived))
 		# print("TTL: ", TTL)
-		if header[3] == ID:
-			return RTT
+		dataSize = struct.calcsize("d")
+		sourceAddr = struct.unpack("I", recPacket[12:16])[0]
+		if header[0] == 0:
+			if header[3] == ID:
+				print("{} bytes from {}: icmp_seq={} ttl={} time={} ms".format(dataSize, sourceAddr, header[4], TTL, RTT))
+				return RTT
+		else:
+			print("{}: {}".format(header[1], data))
+			return data
 		# Fill in end
 		
 		timeLeft = timeLeft - howLongInSelect
@@ -58,7 +65,7 @@ def ping(host, timeout=1):
 	loss = 0
 	goodRTT = []
 	for x in RTTList:
-		if x == "Request timed out.":
+		if type(x) is float:
 			loss += 1
 		else:
 			goodRTT.append(x)
@@ -69,6 +76,6 @@ def ping(host, timeout=1):
 		lossPerc = round((loss/len(RTTList))*100)
 	except ZeroDivisionError:
 		print("Error: Divide by zero.")
-	
+	print("Statistics:")
 	print("Min RTT: {}, Max RTT: {}, Avg RTT: {}, Loss rate percentage: {}".format(minRTT, maxRTT, avgRTT, lossPerc))
 	# Fill in end
