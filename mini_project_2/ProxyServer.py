@@ -25,7 +25,14 @@ while 1:
 	tcpCliSock, addr = tcpSerSock.accept()
 	print('Received a connection from:', addr)
     		  # Fill in start
-	message = tcpCliSock.recv(1024).decode()
+	# data = b''
+	# while True:
+	# 	data += tcpCliSock.recv(1024)
+	# 	if not data:
+	# 		break
+	# message = data.decode()
+	message = tcpCliSock.recv(1024)
+	print("message len: ", len(message))
               # Fill in End
 	print(message)
 	# Extract the filename from the given message
@@ -37,7 +44,7 @@ while 1:
 	print(filetouse)
 	try:
 		# Check wether the file exist in the cache
-		f = open(filetouse[1:], "r")                      
+		f = open(filetouse[1:], "r")        
 		outputdata = f.readlines()                        
 		fileExist = "true"
 		# ProxyServer finds a cache hit and generates a response message
@@ -54,8 +61,9 @@ while 1:
 		# tcpCliSock.send(message)
 		for x in outputdata:
 			tcpCliSock.send(x)
+		f.close()
         # Fill in end
-			print('Read from cache')   
+		print('Read from cache')   
 	# Error handling for file not found in cache
 	except IOError:
 		if fileExist == "false": 
@@ -68,8 +76,11 @@ while 1:
 			try:
 				# Connect to the socket to port 80
                 # Fill in start
-				webServerIP = hostn.split('/')[2]
+				# webServerIP = hostn.split('/')[2]
 				# print(webServerIP)
+				# urlPos = hostn.find('/', 1)
+				
+				# print("BRUHHHH ", hostn)
 				webServerPort = 80
 				# print("WHYYYYYYYYYYYYYYYYYYYYY")
 				c.connect((hostn, webServerPort))
@@ -89,24 +100,33 @@ while 1:
 				# tmpFile.write(response)
 				# tmpFile.close()
 				# c.close()
-				responseCode = response[0].split()[1]
-				if responseCode == "200":
-					for n in response:
-						tmpFile.write(n)
-						tcpCliSock.send(n)
-				else:
-					raise Exception("Non 200 response code: {}".format(responseCode))
+				# responseCode = response[0].split()[1]
+				# responseMessage = response[0].split()[2]
+				# if responseCode == "200":
+				# 	for n in response:
+				# 		tmpFile.write(n)
+				# 		tcpCliSock.send(n)
+				# else:
+				# 	# print("response: {}".format(''.join(response)))
+				# 	raise Exception("Non 200 response code. Details:\n{}".format(response))
+				for n in response:
+					tmpFile.write(n)
+					tcpCliSock.send(n)
 				tmpFile.close()
                 # Fill in end
-			except Exception as e:
-				print(e)
+			# except Exception as e:
+			# 	raise e
+			except:
 				print("Illegal request")
 		else:
 			# HTTP response message for file not found
             # Fill in start
-			tcpCliSock.send("HTTP/1.0 404 File Not Found\r\n")
-			tcpCliSock.send("Content-Type:text/html\r\n")
-			tcpCliSock.send("\r\n")
+			# tcpCliSock.send("HTTP/1.0 404 File Not Found\r\n")
+			# tcpCliSock.send("Content-Type:text/html\r\n")
+			# tcpCliSock.send("\r\n")
+			print("HTTP/1.0 404 File Not Found\r\n")
+			print("Content-Type:text/html\r\n")
+			print("\r\n")
             # Fill in end
 	# Close the client and the server sockets    
 	tcpCliSock.close() 
